@@ -146,3 +146,48 @@
   background: var(--color-danger-subtle);
   border-color: rgba(239, 68, 68, 0.2);
 }
+
+.advanceBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.advanceBtn:hover:not(:disabled) {
+  background: var(--border-default);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+
+.advanceBtn.toProgress:hover:not(:disabled) {
+  background: var(--status-progress-bg);
+  border-color: rgba(99, 102, 241, 0.4);
+  color: var(--status-progress);
+}
+
+.advanceBtn.toCompleted:hover:not(:disabled) {
+  background: var(--status-done-bg);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: var(--status-done);
+}
+
+.advanceBtn.toPending:hover:not(:disabled) {
+  background: var(--status-pending-bg);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: var(--status-pending);
+}
+
+.advanceBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

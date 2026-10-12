@@ -5,20 +5,84 @@ import { formatDate, isOverdue } from '../../utils/formatters';
 import styles from './TaskCard.module.css';
 
 /**
- * TaskCard — renders a single task card in the dashboard grid.
+ * TaskCard — renders a single task card in the dashboard grid with quick status advance.
  */
-function TaskCard({ task, onDelete }) {
+function TaskCard({ task, onDelete, onStatusAdvance, isUpdatingStatus = false }) {
   const { id, title, description, status, priority, dueDate, createdAt } = task;
   const isTaskOverdue = dueDate && isOverdue(dueDate) && status !== 'completed';
 
+  // Quick status advance mapping
+  const getNextStatusConfig = () => {
+    switch (status) {
+      case 'pending':
+        return {
+          nextStatus: 'in_progress',
+          label: 'Start',
+          variantClass: styles.toProgress,
+          icon: (
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+          ),
+        };
+      case 'in_progress':
+        return {
+          nextStatus: 'completed',
+          label: 'Complete',
+          variantClass: styles.toCompleted,
+          icon: (
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          ),
+        };
+      case 'completed':
+      default:
+        return {
+          nextStatus: 'pending',
+          label: 'Reopen',
+          variantClass: styles.toPending,
+          icon: (
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
+            </svg>
+          ),
+        };
+    }
+  };
+
+  const nextConfig = getNextStatusConfig();
+
   return (
     <article className={`${styles.card} animate-fadeIn`} data-testid={`task-card-${id}`}>
-      {/* Top Header: Status & Priority Badges */}
+      {/* Top Header: Status & Priority Badges + Quick Status Advance */}
       <div className={styles.cardTop}>
         <div className={styles.badgesGroup}>
           <StatusBadge status={status} />
           <PriorityBadge priority={priority} />
         </div>
+
+        {onStatusAdvance && (
+          <button
+            type="button"
+            onClick={() => onStatusAdvance(task, nextConfig.nextStatus)}
+            disabled={isUpdatingStatus}
+            className={`${styles.advanceBtn} ${nextConfig.variantClass}`}
+            id={`task-advance-btn-${id}`}
+            title={`Advance status to ${nextConfig.nextStatus}`}
+            aria-label={`Advance task status to ${nextConfig.nextStatus}`}
+          >
+            {isUpdatingStatus ? (
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 1s linear infinite' }}>
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+              </svg>
+            ) : (
+              nextConfig.icon
+            )}
+            <span>{nextConfig.label}</span>
+          </button>
+        )}
       </div>
 
       {/* Task Title */}

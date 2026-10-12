@@ -43,6 +43,7 @@ function DashboardPage() {
   const [deletingTask, setDeletingTask] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState(null);
+  const [updatingTaskId, setUpdatingTaskId] = useState(null);
 
   const location = useLocation();
 
@@ -92,6 +93,20 @@ function DashboardPage() {
       setError(err.message || 'Failed to delete task');
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  // ── Quick status advance ──────────────────────────────────────────────────
+  const handleStatusAdvance = async (taskToUpdate, nextStatus) => {
+    setUpdatingTaskId(taskToUpdate.id);
+    try {
+      const updated = await taskApi.updateTask(taskToUpdate.id, { status: nextStatus });
+      setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+      setFeedbackMessage(`Updated "${taskToUpdate.title}" status to ${nextStatus.replace('_', ' ')}.`);
+    } catch (err) {
+      setError(err.message || 'Failed to update task status');
+    } finally {
+      setUpdatingTaskId(null);
     }
   };
 
@@ -288,6 +303,8 @@ function DashboardPage() {
                 key={task.id}
                 task={task}
                 onDelete={(t) => setDeletingTask(t)}
+                onStatusAdvance={handleStatusAdvance}
+                isUpdatingStatus={updatingTaskId === task.id}
               />
             ))}
           </main>
