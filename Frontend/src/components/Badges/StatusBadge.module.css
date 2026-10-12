@@ -1,0 +1,50 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: capitalize;
+  white-space: nowrap;
+  line-height: 1.4;
+  user-select: none;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+/* Status variants */
+.pending {
+  background: var(--status-pending-bg);
+  color: var(--status-pending);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+.pending .dot {
+  background: var(--status-pending);
+}
+
+.in_progress {
+  background: var(--status-progress-bg);
+  color: var(--status-progress);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+}
+.in_progress .dot {
+  background: var(--status-progress);
+  animation: pulse 1.5s infinite;
+}
+
+.completed {
+  background: var(--status-done-bg);
+  color: var(--status-done);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+.completed .dot {
+  background: var(--status-done);
+}

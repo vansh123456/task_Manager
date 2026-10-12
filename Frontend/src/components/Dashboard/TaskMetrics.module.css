@@ -1,0 +1,94 @@
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.metricCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+.metricCard:hover {
+  border-color: var(--border-default);
+  transform: translateY(-1px);
+  background: var(--bg-elevated);
+}
+
+.metricCard.active {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+
+.metricInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.metricLabel {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.metricValue {
+  font-size: 1.625rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+  margin-top: 2px;
+}
+
+.metricIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.totalIcon {
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--accent);
+}
+
+.pendingIcon {
+  background: var(--status-pending-bg);
+  color: var(--status-pending);
+}
+
+.progressIcon {
+  background: var(--status-progress-bg);
+  color: var(--status-progress);
+}
+
+.completedIcon {
+  background: var(--status-done-bg);
+  color: var(--status-done);
+}
+
+@media (max-width: 840px) {
+  .metricsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .metricsGrid {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+}
