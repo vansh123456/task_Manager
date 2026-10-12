@@ -8,7 +8,10 @@ import LoadingSkeleton from '../components/UI/LoadingSkeleton';
 import EmptyState from '../components/UI/EmptyState';
 import ErrorAlert from '../components/UI/ErrorAlert';
 import ConfirmModal from '../components/UI/ConfirmModal';
+import Pagination from '../components/Dashboard/Pagination';
 import styles from './DashboardPage.module.css';
+
+const PAGE_SIZE = 6;
 
 /**
  * Priority rank weights for sorting
@@ -29,6 +32,12 @@ function DashboardPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [sortBy, setSortBy] = useState('createdAt-desc');
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Reset to page 1 whenever filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, priorityFilter, sortBy]);
 
   // Deletion modal state
   const [deletingTask, setDeletingTask] = useState(null);
@@ -92,6 +101,7 @@ function DashboardPage() {
     setStatusFilter('all');
     setPriorityFilter('all');
     setSortBy('createdAt-desc');
+    setCurrentPage(1);
   };
 
   const hasActiveFilters =
@@ -156,6 +166,13 @@ function DashboardPage() {
 
     return result;
   }, [tasks, searchQuery, statusFilter, priorityFilter, sortBy]);
+
+  // Pagination computations
+  const totalPages = Math.ceil(filteredTasks.length / PAGE_SIZE) || 1;
+  const paginatedTasks = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredTasks.slice(start, start + PAGE_SIZE);
+  }, [filteredTasks, currentPage]);
 
   return (
     <div className="animate-fadeIn">
@@ -259,12 +276,14 @@ function DashboardPage() {
         <>
           <div className={styles.resultsMeta}>
             <span>
-              Showing {filteredTasks.length} of {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}
+              {filteredTasks.length > PAGE_SIZE
+                ? `Showing ${(currentPage - 1) * PAGE_SIZE + 1}–${Math.min(currentPage * PAGE_SIZE, filteredTasks.length)} of ${filteredTasks.length} tasks`
+                : `Showing ${filteredTasks.length} of ${tasks.length} ${tasks.length === 1 ? 'task' : 'tasks'}`}
             </span>
           </div>
 
           <main className={styles.taskGrid} aria-label="Tasks list">
-            {filteredTasks.map((task) => (
+            {paginatedTasks.map((task) => (
               <TaskCard
                 key={task.id}
                 task={task}
@@ -272,6 +291,14 @@ function DashboardPage() {
               />
             ))}
           </main>
+
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredTasks.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setCurrentPage}
+          />
         </>
       )}
 
