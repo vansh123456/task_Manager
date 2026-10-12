@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import * as taskApi from '../services/taskApi';
 import TaskCard from '../components/TaskCard/TaskCard';
 import TaskMetrics from '../components/Dashboard/TaskMetrics';
@@ -34,6 +34,16 @@ function DashboardPage() {
   const [deletingTask, setDeletingTask] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState(null);
+
+  const location = useLocation();
+
+  // Pick up notification from navigation (e.g. redirected after create/edit)
+  useEffect(() => {
+    if (location.state?.notification) {
+      setFeedbackMessage(location.state.notification);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   // ── Fetch tasks ───────────────────────────────────────────────────────────
   const fetchTasks = useCallback(async () => {
