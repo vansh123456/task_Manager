@@ -1,0 +1,332 @@
+openapi: 3.0.3
+info:
+  title: Cleanomatics Task Management API
+  description: >
+    Production REST API specification for the Cleanomatics Task Management System.
+    Built with Node.js, Express, ES modules, and in-memory persistent storage.
+  version: 1.0.0
+  contact:
+    name: Cleanomatics Engineering
+
+servers:
+  - url: http://localhost:5001
+    description: Local development server
+
+tags:
+  - name: Health
+    description: Server health checks
+  - name: Tasks
+    description: CRUD operations for tasks
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Returns server status and current timestamp.
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Server is healthy and running.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: '2026-10-12T16:30:00.000Z'
+
+  /api/tasks:
+    get:
+      summary: Get all tasks
+      description: Retrieves all tasks stored in memory.
+      tags:
+        - Tasks
+      responses:
+        '200':
+          description: List of tasks retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskListResponse'
+
+    post:
+      summary: Create a new task
+      description: Validates and creates a new task.
+      tags:
+        - Tasks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskInput'
+      responses:
+        '201':
+          description: Task created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskSingleResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  /api/tasks/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: UUID v4 of the task
+        schema:
+          type: string
+          format: uuid
+          example: '8a9c2db2-2df4-4682-9598-a1f9453c0765'
+
+    get:
+      summary: Get task by ID
+      description: Retrieves a single task by its unique identifier.
+      tags:
+        - Tasks
+      responses:
+        '200':
+          description: Task found and returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskSingleResponse'
+        '404':
+          description: Task not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Update task by ID
+      description: Updates one or more fields of an existing task.
+      tags:
+        - Tasks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskInput'
+      responses:
+        '200':
+          description: Task updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskSingleResponse'
+        '400':
+          description: Invalid request body or validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '404':
+          description: Task not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Delete task by ID
+      description: Permanently removes a task from memory.
+      tags:
+        - Tasks
+      responses:
+        '200':
+          description: Task successfully deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskSingleResponse'
+        '404':
+          description: Task not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Task:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - status
+        - priority
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: '8a9c2db2-2df4-4682-9598-a1f9453c0765'
+        title:
+          type: string
+          maxLength: 100
+          example: 'Implement User Authentication Flow'
+        description:
+          type: string
+          maxLength: 1000
+          example: 'Set up session-based or token-based authentication with input validation.'
+        status:
+          type: string
+          enum: [pending, in_progress, completed]
+          default: pending
+          example: pending
+        priority:
+          type: string
+          enum: [low, medium, high]
+          default: low
+          example: high
+        dueDate:
+          type: string
+          format: date
+          nullable: true
+          example: '2026-11-15'
+        createdAt:
+          type: string
+          format: date-time
+          example: '2026-10-12T16:00:00.000Z'
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2026-10-12T16:00:00.000Z'
+
+    CreateTaskInput:
+      type: object
+      required:
+        - title
+        - description
+      properties:
+        title:
+          type: string
+          maxLength: 100
+          description: Task title (non-empty string)
+          example: 'Implement User Authentication Flow'
+        description:
+          type: string
+          maxLength: 1000
+          description: Detailed task description
+          example: 'Set up session-based or token-based authentication with input validation.'
+        status:
+          type: string
+          enum: [pending, in_progress, completed]
+          default: pending
+          example: pending
+        priority:
+          type: string
+          enum: [low, medium, high]
+          default: low
+          example: high
+        dueDate:
+          type: string
+          format: date
+          nullable: true
+          description: Due date in YYYY-MM-DD format
+          example: '2026-11-15'
+
+    UpdateTaskInput:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 100
+          example: 'Updated Authentication Flow'
+        description:
+          type: string
+          maxLength: 1000
+          example: 'Added refresh token rotation requirements.'
+        status:
+          type: string
+          enum: [pending, in_progress, completed]
+          example: in_progress
+        priority:
+          type: string
+          enum: [low, medium, high]
+          example: medium
+        dueDate:
+          type: string
+          format: date
+          nullable: true
+          example: '2026-11-20'
+
+    TaskListResponse:
+      type: object
+      required:
+        - success
+        - count
+        - data
+      properties:
+        success:
+          type: boolean
+          example: true
+        count:
+          type: integer
+          example: 1
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Task'
+
+    TaskSingleResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/Task'
+
+    ValidationErrorResponse:
+      type: object
+      required:
+        - success
+        - message
+        - errors
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: 'Validation failed'
+        errors:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            title: 'Title is required'
+            description: 'Description is required'
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: 'Task with id 8a9c2db2-2df4-4682-9598-a1f9453c0765 not found'
